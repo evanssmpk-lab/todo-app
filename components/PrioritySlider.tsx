@@ -152,11 +152,14 @@ export function PrioritySlider({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`relative h-2 w-full cursor-pointer touch-none rounded-full ${
+        className={`relative flex h-9 w-full cursor-pointer touch-none items-center ${
           !hasValue && !dragging ? "opacity-60" : ""
         }`}
-        style={{ background: gradient }}
       >
+        <div
+          className="h-3 w-full rounded-full"
+          style={{ background: gradient }}
+        />
         <div
           role="slider"
           tabIndex={0}

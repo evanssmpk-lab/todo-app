@@ -48,7 +48,7 @@ export default async function ArsipPage() {
           ) : (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-800 py-16 text-center text-zinc-500">
               <span className="text-4xl">🗂️</span>
-              <p>Belum ada todo yang selesai atau terlewat.</p>
+              <p>Belum ada tugas yang selesai atau terlewat.</p>
             </div>
           )}
         </div>
