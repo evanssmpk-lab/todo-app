@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPushToUser } from "@/lib/webpush";
+import { generateTodoFromPreset } from "@/lib/presetGenerate";
+import { jakartaDayOfWeek, jakartaNow, jakartaTodayISO } from "@/lib/tz";
 
 const LEAD_MINUTES = 30;
 
@@ -20,10 +22,30 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createAdminClient();
-  const now = new Date();
+  const now = jakartaNow();
   const windowEnd = new Date(now.getTime() + LEAD_MINUTES * 60_000);
-  const todayISO = now.toISOString().slice(0, 10);
+  const todayISO = jakartaTodayISO();
 
+  // ===== 1. Generate todo hari ini dari preset yang jadwalnya cocok =====
+  const { data: presets, error: presetError } = await supabase
+    .from("presets")
+    .select("*")
+    .contains("hari", [jakartaDayOfWeek()]);
+
+  let presetGenerated = 0;
+  if (!presetError && presets) {
+    for (const preset of presets) {
+      const { created } = await generateTodoFromPreset(
+        supabase,
+        preset.user_id,
+        preset,
+        todayISO
+      );
+      if (created) presetGenerated++;
+    }
+  }
+
+  // ===== 2. Cek reminder yang waktunya mendekat =====
   const { data: todos, error } = await supabase
     .from("todos")
     .select("*")
@@ -59,5 +81,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ checked: todos?.length ?? 0, due: due.length, sent });
+  return NextResponse.json({
+    presetGenerated,
+    checked: todos?.length ?? 0,
+    due: due.length,
+    sent,
+  });
 }

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parseTodoText } from "@/lib/gemini";
+import { resolveTanggalJam } from "@/lib/todoDate";
 import type { Kategori, Prioritas } from "@/lib/types";
 
 function matchByName<T extends { id: string; nama: string }>(
@@ -86,13 +87,22 @@ export async function POST(request: NextRequest) {
     parsed.prioritas_saran
   );
 
+  // Jaga-jaga: kalau AI menghasilkan tanggal hari-ini + jam yang ternyata
+  // sudah lewat dari waktu request (mis. "jam 5 pagi" diucapkan jam 9 malam
+  // tanpa bilang "besok"), majukan otomatis ke besok.
+  const { tanggal, jam } = resolveTanggalJam(
+    parsed.tanggal,
+    parsed.jam,
+    new Date(timestamp)
+  );
+
   const { data: todo, error: insertError } = await supabase
     .from("todos")
     .insert({
       user_id: user.id,
       aktivitas: parsed.aktivitas,
-      tanggal: parsed.tanggal,
-      jam: parsed.jam,
+      tanggal,
+      jam,
       catatan: parsed.catatan,
       kategori_id,
       prioritas_id,

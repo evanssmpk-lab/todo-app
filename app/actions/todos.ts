@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { resolveTanggalJam } from "@/lib/todoDate";
 import type { TodoStatus } from "@/lib/types";
 
 async function currentUserId() {
@@ -17,11 +18,13 @@ export async function createTodo(formData: FormData) {
   const { supabase, userId } = await currentUserId();
 
   const aktivitas = formData.get("aktivitas") as string;
-  const tanggal = formData.get("tanggal") as string;
-  const jam = (formData.get("jam") as string) || null;
+  const tanggalInput = formData.get("tanggal") as string;
+  const jamInput = (formData.get("jam") as string) || null;
   const catatan = (formData.get("catatan") as string) || null;
   const kategori_id = (formData.get("kategori_id") as string) || null;
   const prioritas_id = (formData.get("prioritas_id") as string) || null;
+
+  const { tanggal, jam } = resolveTanggalJam(tanggalInput, jamInput);
 
   const { error } = await supabase.from("todos").insert({
     user_id: userId,
@@ -56,6 +59,28 @@ export async function updateTodoField(
 export async function deleteTodo(id: string) {
   const { supabase } = await currentUserId();
   const { error } = await supabase.from("todos").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/arsip");
+}
+
+export async function forceArchiveTodo(id: string) {
+  const { supabase } = await currentUserId();
+  const { error } = await supabase
+    .from("todos")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/arsip");
+}
+
+export async function unarchiveTodo(id: string) {
+  const { supabase } = await currentUserId();
+  const { error } = await supabase
+    .from("todos")
+    .update({ archived_at: null })
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/arsip");

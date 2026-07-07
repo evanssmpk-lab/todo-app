@@ -1,9 +1,15 @@
 "use client";
 
 import { useTransition } from "react";
-import { deleteTodo, updateTodoField } from "@/app/actions/todos";
+import {
+  deleteTodo,
+  forceArchiveTodo,
+  unarchiveTodo,
+  updateTodoField,
+} from "@/app/actions/todos";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { PrioritySlider } from "@/components/PrioritySlider";
+import { Popover } from "@/components/ui/Popover";
 import { priorityColor } from "@/lib/priorityColor";
 import type { Kategori, Prioritas, Todo } from "@/lib/types";
 
@@ -11,6 +17,12 @@ const STATUS_BADGE: Record<Todo["status"], string> = {
   belum_selesai: "bg-zinc-800 text-zinc-300",
   selesai: "bg-emerald-900/50 text-emerald-300",
   terlewat: "bg-red-900/50 text-red-300",
+};
+
+const STATUS_LABEL: Record<Todo["status"], string> = {
+  belum_selesai: "belum selesai",
+  selesai: "selesai",
+  terlewat: "terlewat",
 };
 
 function formatTanggal(tanggal: string) {
@@ -26,15 +38,27 @@ export function TodoItem({
   kategoriList,
   prioritasList,
   showToggle = true,
+  onDelete,
 }: {
   todo: Todo;
   kategoriList: Kategori[];
   prioritasList: Prioritas[];
   showToggle?: boolean;
+  onDelete?: (id: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const isDone = todo.status === "selesai";
+  const isArchived = !!todo.archived_at;
   const accent = todo.prioritas ? priorityColor(todo.prioritas.urutan) : null;
+
+  function handleDelete(close?: () => void) {
+    close?.();
+    if (onDelete) {
+      onDelete(todo.id);
+    } else {
+      startTransition(() => deleteTodo(todo.id));
+    }
+  }
 
   return (
     <div
@@ -78,7 +102,11 @@ export function TodoItem({
                   stroke="currentColor"
                   strokeWidth={4}
                 >
-                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M5 13l4 4L19 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </button>
@@ -101,19 +129,69 @@ export function TodoItem({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {isArchived && (
+            <span className="whitespace-nowrap rounded-full bg-violet-900/50 px-2 py-0.5 text-xs text-violet-300">
+              diarsipkan manual
+            </span>
+          )}
           <span
             className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs ${STATUS_BADGE[todo.status]}`}
           >
-            {todo.status.replace("_", " ")}
+            {STATUS_LABEL[todo.status]}
           </span>
-          <button
-            onClick={() => startTransition(() => deleteTodo(todo.id))}
-            disabled={pending}
-            className="text-xs text-zinc-500 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+
+          <Popover
+            align="right"
+            trigger={() => (
+              <span className="flex size-7 items-center justify-center rounded-lg text-zinc-500 opacity-0 transition-opacity hover:bg-zinc-800 hover:text-zinc-200 group-hover:opacity-100">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-4"
+                  fill="currentColor"
+                >
+                  <circle cx="12" cy="5" r="1.7" />
+                  <circle cx="12" cy="12" r="1.7" />
+                  <circle cx="12" cy="19" r="1.7" />
+                </svg>
+              </span>
+            )}
           >
-            Hapus
-          </button>
+            {(close) => (
+              <div className="w-48 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900/95 p-1 shadow-2xl shadow-black/50 backdrop-blur-sm">
+                {isArchived ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      close();
+                      startTransition(() => unarchiveTodo(todo.id));
+                    }}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+                  >
+                    Keluarkan dari arsip
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      close();
+                      startTransition(() => forceArchiveTodo(todo.id));
+                    }}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+                  >
+                    Paksa masuk arsip
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(close)}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-950/50"
+                >
+                  Hapus
+                </button>
+              </div>
+            )}
+          </Popover>
         </div>
       </div>
 
