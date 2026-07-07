@@ -65,6 +65,12 @@ export default async function Home() {
             >
               Preset
             </Link>
+            <Link
+              href="/kategori"
+              className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
+            >
+              Kategori
+            </Link>
           </div>
           <div className="flex items-center gap-4 text-sm text-zinc-400">
             <NotificationToggle />

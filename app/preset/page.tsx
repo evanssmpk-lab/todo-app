@@ -1,23 +1,48 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PresetForm } from "@/components/PresetForm";
+import { PresetCreateSection } from "@/components/PresetCreateSection";
 import { PresetItem } from "@/components/PresetItem";
-import type { Kategori, Prioritas, Preset } from "@/lib/types";
+import { PresetGroupItem } from "@/components/PresetGroupItem";
+import type { Kategori, Prioritas, Preset, PresetGroup } from "@/lib/types";
 
 export default async function PresetPage() {
   const supabase = await createClient();
 
-  const [{ data: presets }, { data: kategoriList }, { data: prioritasList }] =
-    await Promise.all([
-      supabase
-        .from("presets")
-        .select("*, kategori(*), prioritas(*)")
-        .order("created_at", { ascending: false }),
-      supabase.from("kategori").select("*").order("nama"),
-      supabase.from("prioritas").select("*").order("urutan"),
-    ]);
+  const [
+    { data: allPresets },
+    { data: groups },
+    { data: kategoriList },
+    { data: prioritasList },
+  ] = await Promise.all([
+    supabase
+      .from("presets")
+      .select("*, kategori(*), prioritas(*)")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("preset_groups")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("kategori").select("*").order("nama"),
+    supabase.from("prioritas").select("*").order("urutan"),
+  ]);
 
-  const list = (presets as Preset[] | null) ?? [];
+  const presets = (allPresets as Preset[] | null) ?? [];
+  const presetList = presets.filter((p) => !p.group_id);
+  const groupList = (groups as PresetGroup[] | null) ?? [];
+
+  const entries = [
+    ...presetList.map((p) => ({
+      type: "preset" as const,
+      createdAt: p.created_at,
+      preset: p,
+    })),
+    ...groupList.map((g) => ({
+      type: "group" as const,
+      createdAt: g.created_at,
+      group: g,
+      items: presets.filter((p) => p.group_id === g.id),
+    })),
+  ].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 
   return (
     <div className="flex flex-1 flex-col text-zinc-50">
@@ -38,19 +63,29 @@ export default async function PresetPage() {
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
         <p className="mb-6 text-sm text-zinc-400">
           Bikin jadwal rutin — tugas ini otomatis muncul sendiri di hari yang
-          dipilih, tanpa perlu diketik ulang tiap hari.
+          dipilih, tanpa perlu diketik ulang tiap hari. Pilih &quot;Satu
+          kegiatan&quot; untuk satu rutinitas, atau &quot;Grup&quot; kalau satu
+          hari punya beberapa kegiatan sekaligus.
         </p>
 
-        <PresetForm
+        <PresetCreateSection
           kategoriList={(kategoriList as Kategori[]) ?? []}
           prioritasList={(prioritasList as Prioritas[]) ?? []}
         />
 
         <div className="flex flex-col gap-3">
-          {list.length ? (
-            list.map((preset) => (
-              <PresetItem key={preset.id} preset={preset} />
-            ))
+          {entries.length ? (
+            entries.map((entry) =>
+              entry.type === "preset" ? (
+                <PresetItem key={entry.preset.id} preset={entry.preset} />
+              ) : (
+                <PresetGroupItem
+                  key={entry.group.id}
+                  group={entry.group}
+                  items={entry.items}
+                />
+              )
+            )
           ) : (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-800 py-16 text-center text-zinc-500">
               <span className="text-4xl">🔁</span>

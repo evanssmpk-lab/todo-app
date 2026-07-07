@@ -6,7 +6,7 @@ import { createPreset } from "@/app/actions/presets";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { PrioritySlider } from "@/components/PrioritySlider";
 import { TimePicker } from "@/components/TimePicker";
-import { HARI_PENDEK, describeHari } from "@/lib/calendar";
+import { HariPicker } from "@/components/HariPicker";
 import type { Kategori, Prioritas } from "@/lib/types";
 
 const inputClass =
@@ -38,12 +38,6 @@ export function PresetForm({
   const [jam, setJam] = useState("");
   const [hari, setHari] = useState<number[]>([]);
 
-  function toggleHari(day: number) {
-    setHari((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  }
-
   return (
     <form
       ref={formRef}
@@ -55,7 +49,7 @@ export function PresetForm({
         setJam("");
         setHari([]);
       }}
-      className="mb-6 grid grid-cols-1 gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 shadow-xl shadow-black/20 backdrop-blur-sm transition-shadow focus-within:border-violet-800/60 sm:grid-cols-6"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-6"
     >
       <input
         name="aktivitas"
@@ -93,35 +87,10 @@ export function PresetForm({
       </div>
 
       <div className="sm:col-span-6">
-        <p className="mb-1.5 text-xs text-zinc-500">
-          Ulangi tiap hari
-          {hari.length > 0 ? (
-            <>
-              : <span className="font-medium text-violet-300">{describeHari(hari)}</span>
-            </>
-          ) : (
-            ":"
-          )}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {HARI_PENDEK.map((label, day) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => toggleHari(day)}
-              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                hari.includes(day)
-                  ? "border-violet-500 bg-violet-500/20 text-violet-200"
-                  : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-          {hari.map((d) => (
-            <input key={d} type="hidden" name="hari" value={d} />
-          ))}
-        </div>
+        <HariPicker value={hari} onChange={setHari} />
+        {hari.map((d) => (
+          <input key={d} type="hidden" name="hari" value={d} />
+        ))}
       </div>
 
       <div className="sm:col-span-6">

@@ -26,11 +26,13 @@ export async function GET(request: NextRequest) {
   const windowEnd = new Date(now.getTime() + LEAD_MINUTES * 60_000);
   const todayISO = jakartaTodayISO();
 
-  // ===== 1. Generate todo hari ini dari preset yang jadwalnya cocok =====
+  // ===== 1. Generate todo hari ini dari preset (individu & grup) yang jadwalnya cocok =====
+  const todayDow = jakartaDayOfWeek();
+
   const { data: presets, error: presetError } = await supabase
     .from("presets")
     .select("*")
-    .contains("hari", [jakartaDayOfWeek()]);
+    .contains("hari", [todayDow]);
 
   let presetGenerated = 0;
   if (!presetError && presets) {
@@ -42,6 +44,29 @@ export async function GET(request: NextRequest) {
         todayISO
       );
       if (created) presetGenerated++;
+    }
+  }
+
+  const { data: groups, error: groupError } = await supabase
+    .from("preset_groups")
+    .select("*")
+    .contains("hari", [todayDow]);
+
+  if (!groupError && groups) {
+    for (const group of groups) {
+      const { data: items } = await supabase
+        .from("presets")
+        .select("*")
+        .eq("group_id", group.id);
+      for (const item of items ?? []) {
+        const { created } = await generateTodoFromPreset(
+          supabase,
+          group.user_id,
+          item,
+          todayISO
+        );
+        if (created) presetGenerated++;
+      }
     }
   }
 
