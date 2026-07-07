@@ -35,6 +35,19 @@ body {
   background: #7c3aed66;
 }
 
+/* Safari iOS otomatis nge-zoom halaman saat fokus ke input dengan font-size
+   di bawah 16px (Tailwind text-sm = 14px). Layer "utilities" Tailwind selalu
+   menang lawan layer "base" di urutan normal, TAPI !important membalik
+   urutan prioritas antar-layer (spec CSS cascade layers) — jadi kombinasi
+   @layer base + !important ini yang benar-benar mengalahkan class text-sm. */
+@layer base {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;

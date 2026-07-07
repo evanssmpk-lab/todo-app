@@ -7,12 +7,8 @@ import { CategoryPicker } from "@/components/CategoryPicker";
 import { DatePicker } from "@/components/DatePicker";
 import { TimePicker } from "@/components/TimePicker";
 import { PrioritySlider } from "@/components/PrioritySlider";
+import { jakartaTodayISO } from "@/lib/tz";
 import type { Kategori, Prioritas } from "@/lib/types";
-
-function todayISO() {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
-}
 
 const inputClass =
   "rounded-lg border border-zinc-700 bg-zinc-800/80 px-3 py-2 text-sm text-zinc-50 outline-none transition-colors placeholder:text-zinc-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30";
@@ -40,7 +36,7 @@ export function TodoForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [kategoriId, setKategoriId] = useState("");
   const [prioritasId, setPrioritasId] = useState("");
-  const [tanggal, setTanggal] = useState(todayISO());
+  const [tanggal, setTanggal] = useState(jakartaTodayISO());
   const [jam, setJam] = useState("");
 
   return (
@@ -51,7 +47,7 @@ export function TodoForm({
         formRef.current?.reset();
         setKategoriId("");
         setPrioritasId("");
-        setTanggal(todayISO());
+        setTanggal(jakartaTodayISO());
         setJam("");
       }}
       className="mb-6 grid grid-cols-1 gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4 shadow-xl shadow-black/20 backdrop-blur-sm transition-shadow focus-within:border-violet-800/60 sm:grid-cols-6"

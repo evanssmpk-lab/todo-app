@@ -63,7 +63,7 @@ export function TodoItem({
   return (
     <div
       style={{ borderLeftColor: accent?.border ?? "#3f3f46" }}
-      className={`animate-rise-in group relative overflow-hidden rounded-2xl border border-zinc-800 border-l-4 bg-zinc-900/60 p-4 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/30 ${
+      className={`animate-rise-in relative overflow-hidden rounded-2xl border border-zinc-800 border-l-4 bg-zinc-900/60 p-4 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/30 ${
         pending ? "opacity-50" : ""
       }`}
     >
@@ -88,27 +88,31 @@ export function TodoItem({
                   })
                 )
               }
-              className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                isDone
-                  ? "border-emerald-500 bg-emerald-500"
-                  : "border-zinc-600 hover:border-emerald-500"
-              }`}
+              className="group/check -m-2 flex size-9 shrink-0 items-center justify-center p-2"
             >
-              {isDone && (
-                <svg
-                  viewBox="0 0 24 24"
-                  className="animate-pop-check size-3 text-zinc-950"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={4}
-                >
-                  <path
-                    d="M5 13l4 4L19 7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
+              <span
+                className={`flex size-5 items-center justify-center rounded-full border-2 transition-colors ${
+                  isDone
+                    ? "border-emerald-500 bg-emerald-500"
+                    : "border-zinc-600 group-hover/check:border-emerald-500"
+                }`}
+              >
+                {isDone && (
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="animate-pop-check size-3 text-zinc-950"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={4}
+                  >
+                    <path
+                      d="M5 13l4 4L19 7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
             </button>
           )}
           <div>
@@ -144,7 +148,7 @@ export function TodoItem({
           <Popover
             align="right"
             trigger={() => (
-              <span className="flex size-7 items-center justify-center rounded-lg text-zinc-500 opacity-0 transition-opacity hover:bg-zinc-800 hover:text-zinc-200 group-hover:opacity-100">
+              <span className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200">
                 <svg
                   viewBox="0 0 24 24"
                   className="size-4"

@@ -18,8 +18,8 @@ export function CollapsibleRow({
       style={{ gridTemplateRows: collapsed ? "0fr" : "1fr" }}
     >
       <div
-        className={`overflow-hidden transition-opacity duration-200 ${
-          collapsed ? "opacity-0" : "opacity-100"
+        className={`transition-opacity duration-200 ${
+          collapsed ? "overflow-hidden opacity-0" : "overflow-visible opacity-100"
         }`}
       >
         <div className="pb-3">{children}</div>

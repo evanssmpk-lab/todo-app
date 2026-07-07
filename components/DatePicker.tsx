@@ -9,9 +9,10 @@ import {
   parseISODate,
   toISODate,
 } from "@/lib/calendar";
+import { jakartaNow } from "@/lib/tz";
 
 function todayParts() {
-  const now = new Date();
+  const now = jakartaNow();
   return { y: now.getFullYear(), m: now.getMonth(), d: now.getDate() };
 }
 
