@@ -84,3 +84,22 @@ body {
 .fancy-thumb:active {
   cursor: grabbing;
 }
+
+/* Latar galaksi di halaman auth: nebula blur yang perlahan hanyut. */
+@keyframes nebula-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4%, 6%) scale(1.08);
+  }
+}
+
+.animate-nebula-drift {
+  animation: nebula-drift 18s ease-in-out infinite;
+}
+
+.animate-nebula-drift-slow {
+  animation: nebula-drift 26s ease-in-out infinite reverse;
+}

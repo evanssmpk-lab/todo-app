@@ -28,6 +28,36 @@ export async function login(_prevState: unknown, formData: FormData) {
   redirect("/");
 }
 
+export async function signup(_prevState: unknown, formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const confirm = formData.get("confirm") as string;
+
+  if (password.length < 6) {
+    return { error: "Password minimal 6 karakter." };
+  }
+  if (password !== confirm) {
+    return { error: "Konfirmasi password tidak cocok." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Kalau project Supabase mewajibkan verifikasi email, belum ada sesi aktif
+  // sampai user klik link konfirmasi yang dikirim ke emailnya.
+  if (!data.session) {
+    return {
+      message: "Akun dibuat. Cek email kamu untuk verifikasi sebelum login.",
+    };
+  }
+
+  redirect("/");
+}
+
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();

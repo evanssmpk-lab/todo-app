@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // harus lolos dari gerbang login di sini.
 const PUBLIC_PATHS = [
   "/login",
+  "/signup",
   "/lupa-password",
   "/auth/confirm",
   "/api/shortcut",
@@ -51,7 +52,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && request.nextUrl.pathname === "/login") {
+  if (
+    user &&
+    (request.nextUrl.pathname === "/login" ||
+      request.nextUrl.pathname === "/signup")
+  ) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

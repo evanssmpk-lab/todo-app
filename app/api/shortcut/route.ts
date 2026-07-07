@@ -33,14 +33,26 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Single-user app (lihat PRD §3): ambil satu-satunya user yang terdaftar,
-  // tidak perlu resolusi multi-tenant.
+  // Endpoint ini cuma untuk pemilik app (lihat APP_OWNER_EMAIL), bukan
+  // sembarang user — walau sekarang sign up sudah terbuka untuk umum (F7+),
+  // Shortcut selalu harus nyasar ke akun pemilik, bukan "user pertama yang
+  // ketemu" yang urutannya tidak terjamin begitu ada banyak akun.
+  const ownerEmail = process.env.APP_OWNER_EMAIL;
+  if (!ownerEmail) {
+    return NextResponse.json(
+      { error: "APP_OWNER_EMAIL belum di-set di environment variable." },
+      { status: 500 }
+    );
+  }
+
   const { data: usersData, error: usersError } =
     await supabase.auth.admin.listUsers();
-  const user = usersData?.users[0];
+  const user = usersData?.users.find(
+    (u) => u.email?.toLowerCase() === ownerEmail.toLowerCase()
+  );
   if (usersError || !user) {
     return NextResponse.json(
-      { error: "User tidak ditemukan." },
+      { error: "User pemilik app tidak ditemukan." },
       { status: 500 }
     );
   }
