@@ -5,8 +5,17 @@ import { sendPushToUser } from "@/lib/webpush";
 const LEAD_MINUTES = 30;
 
 export async function GET(request: NextRequest) {
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Dua cara auth didukung: header Authorization (gaya Vercel Cron) atau
+  // query param ?secret= (lebih gampang dikonfigurasi di layanan cron
+  // eksternal seperti cron-job.org yang cuma butuh tempel URL).
+  const authHeader = request.headers.get("authorization");
+  const secretParam = request.nextUrl.searchParams.get("secret");
+  const expected = process.env.CRON_SECRET;
+
+  const authorized =
+    authHeader === `Bearer ${expected}` || (!!secretParam && secretParam === expected);
+
+  if (!authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
