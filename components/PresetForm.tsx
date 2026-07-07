@@ -6,7 +6,7 @@ import { createPreset } from "@/app/actions/presets";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { PrioritySlider } from "@/components/PrioritySlider";
 import { TimePicker } from "@/components/TimePicker";
-import { HARI_PENDEK } from "@/lib/calendar";
+import { HARI_PENDEK, describeHari } from "@/lib/calendar";
 import type { Kategori, Prioritas } from "@/lib/types";
 
 const inputClass =
@@ -74,7 +74,7 @@ export function PresetForm({
         className={`${inputClass} sm:col-span-6`}
       />
 
-      <div className="sm:col-span-3">
+      <div className="sm:col-span-6">
         <input type="hidden" name="kategori_id" value={kategoriId} />
         <CategoryPicker
           options={kategoriList}
@@ -83,7 +83,7 @@ export function PresetForm({
           placeholder="Kategori..."
         />
       </div>
-      <div className="sm:col-span-3">
+      <div className="sm:col-span-6">
         <input type="hidden" name="prioritas_id" value={prioritasId} />
         <PrioritySlider
           options={prioritasList}
@@ -93,7 +93,16 @@ export function PresetForm({
       </div>
 
       <div className="sm:col-span-6">
-        <p className="mb-1.5 text-xs text-zinc-500">Ulangi tiap hari:</p>
+        <p className="mb-1.5 text-xs text-zinc-500">
+          Ulangi tiap hari
+          {hari.length > 0 ? (
+            <>
+              : <span className="font-medium text-violet-300">{describeHari(hari)}</span>
+            </>
+          ) : (
+            ":"
+          )}
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {HARI_PENDEK.map((label, day) => (
             <button

@@ -76,7 +76,7 @@ export function TodoForm({
         className={`${inputClass} sm:col-span-6`}
       />
 
-      <div className="sm:col-span-3">
+      <div className="sm:col-span-6">
         <input type="hidden" name="kategori_id" value={kategoriId} />
         <CategoryPicker
           options={kategoriList}
@@ -85,7 +85,7 @@ export function TodoForm({
           placeholder="Kategori..."
         />
       </div>
-      <div className="sm:col-span-3">
+      <div className="sm:col-span-6">
         <input type="hidden" name="prioritas_id" value={prioritasId} />
         <PrioritySlider
           options={prioritasList}

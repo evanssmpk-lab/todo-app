@@ -14,6 +14,33 @@ export const BULAN = [
 ];
 
 export const HARI_PENDEK = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+export const HARI_PANJANG = [
+  "Minggu",
+  "Senin",
+  "Selasa",
+  "Rabu",
+  "Kamis",
+  "Jumat",
+  "Sabtu",
+];
+
+// Ringkasan hari terpilih jadi teks: "Selasa" / "Selasa dan Rabu" /
+// "Selasa, Rabu, dan Kamis" / "hari kerja" (Senin-Sabtu) / "tiap hari" (semua).
+export function describeHari(hari: number[]): string {
+  if (hari.length === 0) return "";
+  const sorted = [...new Set(hari)].sort((a, b) => a - b);
+
+  if (sorted.length === 7) return "tiap hari";
+
+  const isHariKerja =
+    sorted.length === 6 && [1, 2, 3, 4, 5, 6].every((d, i) => sorted[i] === d);
+  if (isHariKerja) return "hari kerja";
+
+  const names = sorted.map((d) => HARI_PANJANG[d]);
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} dan ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, dan ${names[names.length - 1]}`;
+}
 
 export function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
